@@ -12,6 +12,8 @@ export class FeedItemComponent implements OnInit {
 
   constructor() { }
 
-  ngOnInit() {}
+  ngOnInit() {
+    console.log(this.feedItem);
+  }
 
 }
