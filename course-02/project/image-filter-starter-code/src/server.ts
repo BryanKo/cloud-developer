@@ -1,6 +1,7 @@
 import express from 'express';
 import bodyParser from 'body-parser';
 import {filterImageFromURL, deleteLocalFiles} from './util/util';
+import { nextTick } from 'process';
 
 (async () => {
 
@@ -30,7 +31,28 @@ import {filterImageFromURL, deleteLocalFiles} from './util/util';
   /**************************************************************************** */
 
   //! END @TODO1
-  
+  app.get("/filteredimage", async (req, res, next) => {
+    let { image_url } = req.query;
+    // console.log(image_url != null);
+
+    if (!image_url) {
+      return res.status(400).send("no image url found");
+    }
+
+    // process immage with error check
+    await filterImageFromURL(image_url).then(result => {
+      res.status(200).sendFile(result, {}, (err) => {
+        if (err)
+          // 422 Unprocessable Entity
+          return res.status(422).send("unable to process image"); 
+        deleteLocalFiles([result]);
+      });
+    }).catch(err => {
+      // 422 Unprocessable Entity
+      res.status(422).send("unable to process url input");
+    });
+  });
+
   // Root Endpoint
   // Displays a simple message to the user
   app.get( "/", async ( req, res ) => {
